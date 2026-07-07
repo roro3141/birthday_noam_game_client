@@ -1,86 +1,86 @@
-!DOCTYPE html
-html lang=he dir=rtl
-head
-    meta charset=UTF-8
-    meta name=viewport content=width=device-width, initial-scale=1.0
-    titleמשחק משפחתי - בדיקהtitle
-    script src=httpscdn.socket.io4.7.5socket.io.min.jsscript
-    style
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק משפחתי - בדיקה</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
         body {
-            font-family Arial, sans-serif;
-            text-align center;
-            background-color #f0f2f5;
-            padding 20px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f2f5;
+            padding: 20px;
         }
         button {
-            padding 15px 30px;
-            font-size 18px;
-            background-color #007bff;
-            color white;
-            border none;
-            border-radius 8px;
-            cursor pointer;
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
         }
-        buttonhover { background-color #0056b3; }
-        #status { margin 20px 0; font-weight bold; color #ffa500; }
+        button:hover { background-color: #0056b3; }
+        #status { margin: 20px 0; font-weight: bold; color: #ffa500; }
         #log {
-            background white;
-            padding 15px;
-            border-radius 8px;
-            max-width 400px;
-            margin 20px auto;
-            border 1px solid #ccc;
-            text-align right;
-            height 15px;
-            overflow-y auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            text-align: right;
+            height: 15px;
+            overflow-y: auto;
         }
-    style
-head
-body
+    </style>
+</head>
+<body>
 
-    h1בדיקת חיבור למשחק המשפחתיh1
+    <h1>בדיקת חיבור למשחק המשפחתי</h1>
     
-    div id=statusמתחבר לשרת... (אם השרת ישן, זה עשוי לקחת כדקה)div
+    <div id="status">מתחבר לשרת... (אם השרת ישן, זה עשוי לקחת כדקה)</div>
     
-    button id=actionBtn disabledשלח Hello World לכולם!button
+    <button id="actionBtn" disabled>שלח "Hello World" לכולם!</button>
 
-    h3לוג הודעות מהשרתh3
-    div id=logאין הודעות בינתיים.div
+    <h3>לוג הודעות מהשרת:</h3>
+    <div id="log">אין הודעות בינתיים.</div>
 
-    script
-         !!! החלף את הכתובת הזו בכתובת שקיבלת מ-Render !!!
-        const SERVER_URL = httpsyour-server-name.onrender.com; 
+    <script>
+        // !!! החלף את הכתובת הזו בכתובת שקיבלת מ-Render !!!
+        const SERVER_URL = "https://your-server-name.onrender.com"; 
 
-         התחברות לשרת בזמן אמת
+        // התחברות לשרת בזמן אמת
         const socket = io(SERVER_URL);
 
         const statusDiv = document.getElementById('status');
         const actionBtn = document.getElementById('actionBtn');
         const logDiv = document.getElementById('log');
 
-         אירוע החיבור לשרת הצליח
-        socket.on('connect', () = {
-            statusDiv.innerText = מחובר לשרת בהצלחה!;
-            statusDiv.style.color = green;
-            actionBtn.disabled = false;  הפעלת הכפתור
+        // אירוע: החיבור לשרת הצליח
+        socket.on('connect', () => {
+            statusDiv.innerText = "מחובר לשרת בהצלחה!";
+            statusDiv.style.color = "green";
+            actionBtn.disabled = false; // הפעלת הכפתור
         });
 
-         אירוע השרת שלח לנו (או למישהו אחר) מסר
-        socket.on('pong_client', (data) = {
+        // אירוע: השרת שלח לנו (או למישהו אחר) מסר
+        socket.on('pong_client', (data) => {
             logDiv.innerText = data.message;
         });
 
-         אירוע ניתוק מהשרת
-        socket.on('disconnect', () = {
-            statusDiv.innerText = החיבור לשרת נותק.;
-            statusDiv.style.color = red;
+        // אירוע: ניתוק מהשרת
+        socket.on('disconnect', () => {
+            statusDiv.innerText = "החיבור לשרת נותק.";
+            statusDiv.style.color = "red";
             actionBtn.disabled = true;
         });
 
-         לחיצה על הכפתור שולחת אירוע לשרת
-        actionBtn.addEventListener('click', () = {
-            socket.emit('ping_server', { text Hello World מהטלפון! });
+        // לחיצה על הכפתור שולחת אירוע לשרת
+        actionBtn.addEventListener('click', () => {
+            socket.emit('ping_server', { text: "Hello World מהטלפון!" });
         });
-    script
-body
-html
+    </script>
+</body>
+</html>
