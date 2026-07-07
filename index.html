@@ -3,168 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>משחק הקלפים המשפחתי</title>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <title>משחק קלפים רשת</title>
     <style>
-        body { font-family: system-ui, sans-serif; text-align: center; background: #eef2f3; margin: 0; padding: 15px; }
-        .screen { display: none; max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .active { display: block; }
-        input, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
-        button { background: #28a745; color: white; font-weight: bold; border: none; cursor: pointer; }
-        button:disabled { background: #ccc; }
-        .card-box { font-size: 48px; font-weight: bold; width: 100px; height: 140px; line-height: 140px; margin: 20px auto; border-radius: 10px; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        .positive { background: #007bff; }
-        .negative { background: #dc3545; }
-        .hand { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
-        .my-card { background: #f8f9fa; border: 2px solid #28a745; padding: 15px 0; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        .my-card.selected { background: #28a745; color: white; }
-        .scoreboard { text-align: right; background: #f1f3f5; padding: 10px; border-radius: 8px; margin: 15px 0; }
+        :root {
+            --bg-color: #2c3e50;
+            --card-bg: #ecf0f1;
+            --primary: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --text: #34495e;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #lobby, #game-board { display: none; width: 100%; max-width: 800px; text-align: center; }
+        .active { display: block !important; }
+        
+        /* כרטיסים ואנימציות */
+        .card {
+            background: var(--card-bg);
+            color: var(--text);
+            width: 60px;
+            height: 90px;
+            border-radius: 8px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 8px 12px rgba(0,0,0,0.4); }
+        .card.disabled { opacity: 0.5; pointer-events: none; transform: none; }
+        
+        .prize-card {
+            width: 100px;
+            height: 150px;
+            font-size: 40px;
+            margin: 20px auto;
+            cursor: default;
+            animation: flipIn 0.6s ease-out;
+        }
+        .prize-positive { color: var(--success); }
+        .prize-negative { color: var(--danger); }
+        
+        @keyframes flipIn {
+            0% { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
+
+        /* רשימת שחקנים */
+        .players-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .player-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+        .player-badge.played { background: var(--success); }
+        
+        /* הודעות */
+        #status-message {
+            font-size: 1.2rem;
+            margin: 15px 0;
+            min-height: 30px;
+            color: #f1c40f;
+        }
+        
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button { background-color: var(--primary); color: white; cursor: pointer; }
+        button:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <div id="loginScreen" class="screen active">
-        <h2>משחק קלפים משפחתי</h2>
-        <input type="text" id="playerName" placeholder="השם שלך">
-        <input type="text" id="roomCode" placeholder="קוד חדר (למשל: 1234)">
-        <button id="joinBtn">התחבר למשחק</button>
+    <div id="lobby" class="active">
+        <h1>משחק קלפים</h1>
+        <input type="text" id="playerName" placeholder="הכנס את שמך..." maxlength="10">
+        <button onclick="joinGame()">הצטרף למשחק</button>
+        <div id="lobby-players" style="margin-top: 20px;"></div>
+        <button id="start-btn" onclick="startGame()" style="display:none; margin-top: 20px; background-color: var(--success);">התחל משחק</button>
     </div>
 
-    <div id="lobbyScreen" class="screen">
-        <h2>חדר המתנה: <span id="displayRoom"></span></h2>
-        <h3>שחקנים בחדר:</h3>
-        <ul id="playerList" style="text-align:right;"></ul>
-        <button id="startBtn">התחל משחק (לפחות 2 שחקנים)</button>
-    </div>
-
-    <div id="gameScreen" class="screen">
-        <div class="scoreboard">
-            <strong>ניקוד שחקנים:</strong>
-            <div id="scores"></div>
+    <div id="game-board">
+        <div class="players-container" id="players-list"></div>
+        
+        <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px;">
+            <h2>קלף האמצע</h2>
+            <div id="prize-container"></div>
+            <div id="status-message">ממתין לתחילת הסיבוב...</div>
         </div>
-        
-        <h3>הקלף שבקופה המרכזית:</h3>
-        <div id="midCard" class="card-box positive">0</div>
 
-        <p id="statusMsg">בחר קלף מהיד שלך:</p>
-        
-        <div id="myHand" class="hand"></div>
-        <button id="confirmBtn" style="margin-top:20px;" disabled>אשר בחירה</button>
+        <h3 style="margin-top: 30px;">הקלפים שלך</h3>
+        <div id="my-hand"></div>
     </div>
 
-    <div id="endScreen" class="screen">
-        <h2>המשחק נגמר! 🏆</h2>
-        <div id="finalScores" style="text-align:right; font-size:18px;"></div>
-        <button onclick="location.reload()">שחק שוב</button>
-    </div>
-
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        // !!! החלף פה לכתובת השרת האמיתית שלך מ-Render !!!
-        const SERVER_URL = "https://game-server-gwy6.onrender.com"; 
-        const socket = io(SERVER_URL);
+        const socket = io('https://game-server-gwy6.onrender.com');
+        
+        let myHand = [];
+        let myId = null;
 
-        let myRoom = "";
-        let selectedCard = null;
-
-        // מעברי מסכים
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        // --- פונקציות ממשק ---
+        function switchScreen(screenId) {
+            document.getElementById('lobby').classList.remove('active');
+            document.getElementById('game-board').classList.remove('active');
             document.getElementById(screenId).classList.add('active');
         }
 
-        // התחברות
-        document.getElementById('joinBtn').addEventListener('click', () => {
-            const playerName = document.getElementById('playerName').value.trim();
-            myRoom = document.getElementById('roomCode').value.trim();
-            if(!playerName || !myRoom) return alert("נא למלא שם וקוד חדר");
-            
-            socket.emit('join_room', { roomCode: myRoom, playerName });
-            document.getElementById('displayRoom').innerText = myRoom;
-            showScreen('lobbyScreen');
-        });
-
-        // עדכון רשימת השחקנים בלובי
-        socket.on('room_update', (players) => {
-            const list = document.getElementById('playerList');
-            list.innerHTML = players.map(p => `<li>${p.name} ותיקיית הקלפים שלו מוכנה</li>`).join('');
-        });
-
-        // תחילת משחק
-        document.getElementById('startBtn').addEventListener('click', () => {
-            socket.emit('start_game', myRoom);
-        });
-
-        socket.on('game_started', (data) => {
-            showScreen('gameScreen');
-            updateState(data.currentCard, data.players);
-        });
-
-        // עדכון מצב הלוח והיד של השחקן
-        function updateState(currentCard, players) {
-            // עדכון הקלף המרכזי
-            const midCardDiv = document.getElementById('midCard');
-            midCardDiv.innerText = currentCard;
-            if(currentCard > 0) {
-                midCardDiv.className = "card-box positive";
-            } else {
-                midCardDiv.className = "card-box negative";
-            }
-
-            // עדכון הניקוד
-            const scoresDiv = document.getElementById('scores');
-            scoresDiv.innerHTML = Object.values(players).map(p => `<div>${p.name}: ${p.score} נק'</div>`).join('');
-
-            // בניית יד הקלפים של השחקן עצמו
-            const me = players[socket.id];
-            const handDiv = document.getElementById('myHand');
-            handDiv.innerHTML = "";
-            selectedCard = null;
-            document.getElementById('confirmBtn').disabled = true;
-
-            me.hand.forEach(card => {
-                const btn = document.createElement('div');
-                btn.className = "my-card";
-                btn.innerText = card;
-                btn.onclick = () => {
-                    document.querySelectorAll('.my-card').forEach(c => c.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    selectedCard = card;
-                    document.getElementById('confirmBtn').disabled = false;
-                };
-                handDiv.appendChild(btn);
+        function renderHand(disabled = false) {
+            const handDiv = document.getElementById('my-hand');
+            handDiv.innerHTML = '';
+            myHand.forEach((val, index) => {
+                const card = document.createElement('div');
+                card.className = `card ${disabled ? 'disabled' : ''}`;
+                card.innerText = val;
+                card.onclick = () => playCard(index);
+                handDiv.appendChild(card);
             });
-            document.getElementById('statusMsg').innerText = "בחר קלף מהיד שלך ולחץ אשר:";
         }
 
-        // אישור בחירת קלף
-        document.getElementById('confirmBtn').addEventListener('click', () => {
-            if(selectedCard === null) return;
-            socket.emit('play_card', { roomCode: myRoom, card: selectedCard });
-            document.getElementById('statusMsg').innerText = "מחכים לשאר השחקנים...";
-            document.getElementById('myHand').innerHTML = ""; // מניעת לחיצה כפולה
-            document.getElementById('confirmBtn').disabled = true;
+        function renderPlayers(playersData) {
+            const listDiv = document.getElementById('players-list');
+            listDiv.innerHTML = '';
+            for (let id in playersData) {
+                const p = playersData[id];
+                const badge = document.createElement('div');
+                badge.className = `player-badge ${p.hasPlayed ? 'played' : ''}`;
+                badge.innerText = `${p.name} | ניקוד: ${p.score}`;
+                listDiv.appendChild(badge);
+            }
+        }
+
+        // --- פעולות שחקן ---
+        function joinGame() {
+            const name = document.getElementById('playerName').value.trim();
+            if (name) socket.emit('joinGame', name);
+        }
+
+        function startGame() {
+            socket.emit('startGame');
+        }
+
+        function playCard(index) {
+            socket.emit('playCard', index);
+            renderHand(true); // משבית את היד עד הסיבוב הבא
+            document.getElementById('status-message').innerText = "ממתין לשאר השחקנים...";
+        }
+
+        // --- מאזינים לשרת ---
+        socket.on('joined', (data) => {
+            myId = data.id;
+            myHand = data.hand;
         });
 
-        socket.on('player_voted', (id) => {
-            // כאן אפשר להוסיף חיווי ויזואלי שמישהו סיים לבחור
-        });
-
-        // תוצאות סיבוב
-        socket.on('round_result', (data) => {
-            alert(data.summary); // מציג פופ-אפ פשוט למי זכה בסיבוב
-            
-            if (data.gameOver) {
-                showScreen('endScreen');
-                const finalDiv = document.getElementById('finalScores');
-                finalDiv.innerHTML = Object.values(data.players)
-                    .sort((a,b) => b.score - a.score)
-                    .map((p, idx) => `<div>${idx+1}. ${p.name}: ${p.score} נקודות</div>`).join('');
-            } else {
-                updateState(data.nextCard, data.players);
+        socket.on('updateLobby', (playerNames) => {
+            document.getElementById('lobby-players').innerText = 'שחקנים בחדר: ' + playerNames.join(', ');
+            if (playerNames.length >= 2) {
+                document.getElementById('start-btn').style.display = 'inline-block';
             }
         });
 
-        socket.on('error_message', (msg) => alert(msg));
+        socket.on('startRound', (data) => {
+            switchScreen('game-board');
+            renderPlayers(data.players);
+            renderHand(false);
+            
+            const prizeDiv = document.getElementById('prize-container');
+            const colorClass = data.prize > 0 ? 'prize-positive' : 'prize-negative';
+            prizeDiv.innerHTML = `<div class="card prize-card ${colorClass}">${data.prize > 0 ? '+'+data.prize : data.prize}</div>`;
+            
+            document.getElementById('status-message').innerText = `סיבוב ${data.roundCount}/15 - בחר קלף מהיד!`;
+        });
+
+        socket.on('playerPlayed', (playersData) => {
+            renderPlayers(playersData);
+        });
+
+        socket.on('roundResult', (data) => {
+            renderPlayers(data.players);
+            
+            let resultText = "הקלפים שנבחרו:\n";
+            data.playedCards.forEach(pc => {
+                resultText += `${pc.name}: ${pc.card}  `;
+                if (pc.id === myId) {
+                    // עדכון היד המקומית
+                    myHand = myHand.filter(val => val !== pc.card);
+                }
+            });
+            
+            if (data.winnerId) {
+                const winnerName = data.playedCards.find(p => p.id === data.winnerId).name;
+                resultText += `\n\nהמנצח בסיבוב הוא ${winnerName} שקיבל את הקלף ${data.prize}!`;
+            } else {
+                resultText += `\n\nתיקו! אף אחד לא זוכה בקלף האמצע.`;
+            }
+            
+            document.getElementById('status-message').innerText = resultText;
+            renderHand(true); // משאיר מושבת עד לסיבוב הבא
+        });
+
+        socket.on('gameOver', (players) => {
+            let sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
+            let endMsg = "המשחק נגמר!\nתוצאות סופיות:\n";
+            sortedPlayers.forEach((p, i) => {
+                endMsg += `${i+1}. ${p.name} - ${p.score} נקודות\n`;
+            });
+            alert(endMsg);
+            location.reload(); // ריענון חזרה ללובי
+        });
+
+        socket.on('errorMsg', (msg) => {
+            alert(msg);
+        });
     </script>
 </body>
 </html>
