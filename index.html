@@ -3,84 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>משחק משפחתי - בדיקה</title>
+    <title>משחק הקלפים המשפחתי</title>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f2f5;
-            padding: 20px;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        button:hover { background-color: #0056b3; }
-        #status { margin: 20px 0; font-weight: bold; color: #ffa500; }
-        #log {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            max-width: 400px;
-            margin: 20px auto;
-            border: 1px solid #ccc;
-            text-align: right;
-            height: 15px;
-            overflow-y: auto;
-        }
+        body { font-family: system-ui, sans-serif; text-align: center; background: #eef2f3; margin: 0; padding: 15px; }
+        .screen { display: none; max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .active { display: block; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
+        button { background: #28a745; color: white; font-weight: bold; border: none; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        .card-box { font-size: 48px; font-weight: bold; width: 100px; height: 140px; line-height: 140px; margin: 20px auto; border-radius: 10px; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .positive { background: #007bff; }
+        .negative { background: #dc3545; }
+        .hand { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
+        .my-card { background: #f8f9fa; border: 2px solid #28a745; padding: 15px 0; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .my-card.selected { background: #28a745; color: white; }
+        .scoreboard { text-align: right; background: #f1f3f5; padding: 10px; border-radius: 8px; margin: 15px 0; }
     </style>
 </head>
 <body>
 
-    <h1>בדיקת חיבור למשחק המשפחתי</h1>
-    
-    <div id="status">מתחבר לשרת... (אם השרת ישן, זה עשוי לקחת כדקה)</div>
-    
-    <button id="actionBtn" disabled>שלח "Hello World" לכולם!</button>
+    <div id="loginScreen" class="screen active">
+        <h2>משחק קלפים משפחתי</h2>
+        <input type="text" id="playerName" placeholder="השם שלך">
+        <input type="text" id="roomCode" placeholder="קוד חדר (למשל: 1234)">
+        <button id="joinBtn">התחבר למשחק</button>
+    </div>
 
-    <h3>לוג הודעות מהשרת:</h3>
-    <div id="log">אין הודעות בינתיים.</div>
+    <div id="lobbyScreen" class="screen">
+        <h2>חדר המתנה: <span id="displayRoom"></span></h2>
+        <h3>שחקנים בחדר:</h3>
+        <ul id="playerList" style="text-align:right;"></ul>
+        <button id="startBtn">התחל משחק (לפחות 2 שחקנים)</button>
+    </div>
+
+    <div id="gameScreen" class="screen">
+        <div class="scoreboard">
+            <strong>ניקוד שחקנים:</strong>
+            <div id="scores"></div>
+        </div>
+        
+        <h3>הקלף שבקופה המרכזית:</h3>
+        <div id="midCard" class="card-box positive">0</div>
+
+        <p id="statusMsg">בחר קלף מהיד שלך:</p>
+        
+        <div id="myHand" class="hand"></div>
+        <button id="confirmBtn" style="margin-top:20px;" disabled>אשר בחירה</button>
+    </div>
+
+    <div id="endScreen" class="screen">
+        <h2>המשחק נגמר! 🏆</h2>
+        <div id="finalScores" style="text-align:right; font-size:18px;"></div>
+        <button onclick="location.reload()">שחק שוב</button>
+    </div>
 
     <script>
-        // !!! החלף את הכתובת הזו בכתובת שקיבלת מ-Render !!!
+        // !!! החלף פה לכתובת השרת האמיתית שלך מ-Render !!!
         const SERVER_URL = "https://game-server-gwy6.onrender.com"; 
-
-        // התחברות לשרת בזמן אמת
         const socket = io(SERVER_URL);
 
-        const statusDiv = document.getElementById('status');
-        const actionBtn = document.getElementById('actionBtn');
-        const logDiv = document.getElementById('log');
+        let myRoom = "";
+        let selectedCard = null;
 
-        // אירוע: החיבור לשרת הצליח
-        socket.on('connect', () => {
-            statusDiv.innerText = "מחובר לשרת בהצלחה!";
-            statusDiv.style.color = "green";
-            actionBtn.disabled = false; // הפעלת הכפתור
+        // מעברי מסכים
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // התחברות
+        document.getElementById('joinBtn').addEventListener('click', () => {
+            const playerName = document.getElementById('playerName').value.trim();
+            myRoom = document.getElementById('roomCode').value.trim();
+            if(!playerName || !myRoom) return alert("נא למלא שם וקוד חדר");
+            
+            socket.emit('join_room', { roomCode: myRoom, playerName });
+            document.getElementById('displayRoom').innerText = myRoom;
+            showScreen('lobbyScreen');
         });
 
-        // אירוע: השרת שלח לנו (או למישהו אחר) מסר
-        socket.on('pong_client', (data) => {
-            logDiv.innerText = data.message;
+        // עדכון רשימת השחקנים בלובי
+        socket.on('room_update', (players) => {
+            const list = document.getElementById('playerList');
+            list.innerHTML = players.map(p => `<li>${p.name} ותיקיית הקלפים שלו מוכנה</li>`).join('');
         });
 
-        // אירוע: ניתוק מהשרת
-        socket.on('disconnect', () => {
-            statusDiv.innerText = "החיבור לשרת נותק.";
-            statusDiv.style.color = "red";
-            actionBtn.disabled = true;
+        // תחילת משחק
+        document.getElementById('startBtn').addEventListener('click', () => {
+            socket.emit('start_game', myRoom);
         });
 
-        // לחיצה על הכפתור שולחת אירוע לשרת
-        actionBtn.addEventListener('click', () => {
-            socket.emit('ping_server', { text: "Hello World מהטלפון!" });
+        socket.on('game_started', (data) => {
+            showScreen('gameScreen');
+            updateState(data.currentCard, data.players);
         });
+
+        // עדכון מצב הלוח והיד של השחקן
+        function updateState(currentCard, players) {
+            // עדכון הקלף המרכזי
+            const midCardDiv = document.getElementById('midCard');
+            midCardDiv.innerText = currentCard;
+            if(currentCard > 0) {
+                midCardDiv.className = "card-box positive";
+            } else {
+                midCardDiv.className = "card-box negative";
+            }
+
+            // עדכון הניקוד
+            const scoresDiv = document.getElementById('scores');
+            scoresDiv.innerHTML = Object.values(players).map(p => `<div>${p.name}: ${p.score} נק'</div>`).join('');
+
+            // בניית יד הקלפים של השחקן עצמו
+            const me = players[socket.id];
+            const handDiv = document.getElementById('myHand');
+            handDiv.innerHTML = "";
+            selectedCard = null;
+            document.getElementById('confirmBtn').disabled = true;
+
+            me.hand.forEach(card => {
+                const btn = document.createElement('div');
+                btn.className = "my-card";
+                btn.innerText = card;
+                btn.onclick = () => {
+                    document.querySelectorAll('.my-card').forEach(c => c.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedCard = card;
+                    document.getElementById('confirmBtn').disabled = false;
+                };
+                handDiv.appendChild(btn);
+            });
+            document.getElementById('statusMsg').innerText = "בחר קלף מהיד שלך ולחץ אשר:";
+        }
+
+        // אישור בחירת קלף
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            if(selectedCard === null) return;
+            socket.emit('play_card', { roomCode: myRoom, card: selectedCard });
+            document.getElementById('statusMsg').innerText = "מחכים לשאר השחקנים...";
+            document.getElementById('myHand').innerHTML = ""; // מניעת לחיצה כפולה
+            document.getElementById('confirmBtn').disabled = true;
+        });
+
+        socket.on('player_voted', (id) => {
+            // כאן אפשר להוסיף חיווי ויזואלי שמישהו סיים לבחור
+        });
+
+        // תוצאות סיבוב
+        socket.on('round_result', (data) => {
+            alert(data.summary); // מציג פופ-אפ פשוט למי זכה בסיבוב
+            
+            if (data.gameOver) {
+                showScreen('endScreen');
+                const finalDiv = document.getElementById('finalScores');
+                finalDiv.innerHTML = Object.values(data.players)
+                    .sort((a,b) => b.score - a.score)
+                    .map((p, idx) => `<div>${idx+1}. ${p.name}: ${p.score} נקודות</div>`).join('');
+            } else {
+                updateState(data.nextCard, data.players);
+            }
+        });
+
+        socket.on('error_message', (msg) => alert(msg));
     </script>
 </body>
 </html>
