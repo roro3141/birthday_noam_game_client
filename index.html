@@ -6,183 +6,248 @@
     <title>משחק קלפים רשת</title>
     <style>
         :root {
-            --bg-color: #2c3e50;
-            --card-bg: #ecf0f1;
+            --bg-color: #1e272e;
+            --table-bg: #218c53; /* צבע של שולחן קלפים */
+            --card-bg: #f5f6fa;
             --primary: #3498db;
             --success: #2ecc71;
             --danger: #e74c3c;
-            --text: #34495e;
+            --text: #2f3640;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: white;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
-        #lobby, #game-board { display: none; width: 100%; max-width: 800px; text-align: center; }
-        .active { display: block !important; }
-        
-        /* כרטיסים ואנימציות */
-        .card {
-            background: var(--card-bg);
-            color: var(--text);
-            width: 60px;
-            height: 90px;
-            border-radius: 8px;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin: 5px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            user-select: none;
+        #lobby { padding: 50px; text-align: center; }
+        #game-board { 
+            display: none; width: 100%; max-width: 1000px; 
+            background-color: var(--table-bg);
+            border-radius: 20px;
+            margin: 20px;
+            padding: 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 80vh;
+            box-sizing: border-box;
         }
-        .card:hover { transform: translateY(-10px); box-shadow: 0 8px 12px rgba(0,0,0,0.4); }
-        .card.disabled { opacity: 0.5; pointer-events: none; transform: none; }
-        
-        .prize-card {
-            width: 100px;
-            height: 150px;
-            font-size: 40px;
-            margin: 20px auto;
-            cursor: default;
-            animation: flipIn 0.6s ease-out;
+        .active { display: flex !important; }
+
+        /* אזורי שולחן */
+        .opponents-area {
+            display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; min-height: 150px;
         }
-        .prize-positive { color: var(--success); }
-        .prize-negative { color: var(--danger); }
-        
-        @keyframes flipIn {
-            0% { transform: rotateY(90deg) scale(0.8); opacity: 0; }
-            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+        .center-area {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin: 40px 0; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 15px;
+        }
+        .local-player-area {
+            display: flex; flex-direction: column; align-items: center; border-top: 2px solid rgba(255,255,255,0.1); padding-top: 20px;
         }
 
-        /* רשימת שחקנים */
-        .players-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        /* עמדת שחקן */
+        .player-station { display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .player-badge {
-            background: rgba(255,255,255,0.1);
-            padding: 10px 15px;
-            border-radius: 20px;
-            transition: background 0.3s;
+            background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;
         }
-        .player-badge.played { background: var(--success); }
+        .played-card-slot {
+            width: 70px; height: 100px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 8px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* תמונת פרס אמצעית */
+        .prize-img {
+            width: 120px; height: 180px; object-fit: cover; border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            animation: dropIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes dropIn {
+            0% { transform: translateY(-50px) scale(0.8); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* עיצוב קלפים ואנימציית תלת-ממד */
+        .card-3d {
+            width: 70px; height: 100px; perspective: 1000px;
+        }
+        .card-inner {
+            width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; position: relative;
+        }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        .card-face {
+            width: 100%; height: 100%; position: absolute; backface-visibility: hidden;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 28px; font-weight: bold; border: 2px solid white; box-sizing: border-box;
+        }
+        .card-back-pattern { /* גב הקלף - מה שרואים כשהוא הפוך */
+            background: repeating-linear-gradient(45deg, #c0392b, #c0392b 10px, #e74c3c 10px, #e74c3c 20px);
+            color: transparent;
+        }
+        .card-front-value { /* פני הקלף - המספר */
+            background: var(--card-bg); color: var(--text); transform: rotateY(180deg);
+            background-image: radial-gradient(circle, #ffffff 40%, #dcdde1 100%);
+        }
+
+        /* קלפים ביד (למטה) */
+        .hand-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+        .hand-card {
+            width: 60px; height: 90px; background: var(--card-bg); color: var(--text);
+            border-radius: 8px; display: flex; justify-content: center; align-items: center;
+            font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background 0.2s;
+            border: 2px solid #bdc3c7;
+            background-image: radial-gradient(circle, #ffffff 40%, #ecf0f1 100%);
+        }
+        .hand-card:hover { transform: translateY(-15px); background: white; border-color: var(--primary); }
+        .hand-card.disabled { opacity: 0.4; pointer-events: none; transform: none; }
+
+        /* הודעות מצב */
+        #status-message { font-size: 1.3rem; margin-top: 15px; color: #f1c40f; font-weight: bold; text-align: center; white-space: pre-line; }
         
-        /* הודעות */
-        #status-message {
-            font-size: 1.2rem;
-            margin: 15px 0;
-            min-height: 30px;
-            color: #f1c40f;
-        }
-        
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            margin: 5px;
-        }
-        button { background-color: var(--primary); color: white; cursor: pointer; }
-        button:hover { opacity: 0.9; }
+        input, button { padding: 10px 15px; font-size: 16px; border: none; border-radius: 5px; margin: 5px; }
+        button { background-color: var(--primary); color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { background-color: #2980b9; transform: scale(1.05); }
     </style>
 </head>
 <body>
 
     <div id="lobby" class="active">
-        <h1>משחק קלפים</h1>
-        <input type="text" id="playerName" placeholder="הכנס את שמך..." maxlength="10">
-        <button onclick="joinGame()">הצטרף למשחק</button>
-        <div id="lobby-players" style="margin-top: 20px;"></div>
-        <button id="start-btn" onclick="startGame()" style="display:none; margin-top: 20px; background-color: var(--success);">התחל משחק</button>
+        <h1 style="font-size: 3rem; margin-bottom: 10px;">Hol's der Geier</h1>
+        <p>משחק קלפים מרובה משתתפים</p>
+        <div style="margin: 30px 0;">
+            <input type="text" id="playerName" placeholder="הכנס שם שחקן..." maxlength="12">
+            <button onclick="joinGame()">הצטרף</button>
+        </div>
+        <div id="lobby-players"></div>
+        <button id="start-btn" onclick="startGame()" style="display:none; margin-top: 30px; background-color: var(--success); font-size: 1.2rem;">התחל את המשחק</button>
     </div>
 
     <div id="game-board">
-        <div class="players-container" id="players-list"></div>
-        
-        <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px;">
-            <h2>קלף האמצע</h2>
+        <div class="opponents-area" id="opponents-area"></div>
+
+        <div class="center-area">
             <div id="prize-container"></div>
             <div id="status-message">ממתין לתחילת הסיבוב...</div>
         </div>
 
-        <h3 style="margin-top: 30px;">הקלפים שלך</h3>
-        <div id="my-hand"></div>
+        <div class="local-player-area">
+            <div class="player-station">
+                <div class="player-badge" id="local-player-info"></div>
+                <div id="local-played-slot" class="played-card-slot"></div>
+            </div>
+            <div class="hand-container" id="my-hand"></div>
+        </div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io('https://game-server-gwy6.onrender.com');
-        
         let myHand = [];
         let myId = null;
 
-        // --- פונקציות ממשק ---
         function switchScreen(screenId) {
             document.getElementById('lobby').classList.remove('active');
             document.getElementById('game-board').classList.remove('active');
             document.getElementById(screenId).classList.add('active');
         }
 
+        // רינדור היד של השחקן בתחתית המסך
         function renderHand(disabled = false) {
             const handDiv = document.getElementById('my-hand');
             handDiv.innerHTML = '';
             myHand.forEach((val, index) => {
                 const card = document.createElement('div');
-                card.className = `card ${disabled ? 'disabled' : ''}`;
+                card.className = `hand-card ${disabled ? 'disabled' : ''}`;
                 card.innerText = val;
                 card.onclick = () => playCard(index);
                 handDiv.appendChild(card);
             });
         }
 
-        function renderPlayers(playersData) {
-            const listDiv = document.getElementById('players-list');
-            listDiv.innerHTML = '';
+        // רינדור הלוח: יריבים למעלה, שחקן מקומי למטה. מטפל גם בהצגת הקלף שהונח.
+        function renderBoard(playersData, roundResultCards = null) {
+            const opponentsDiv = document.getElementById('opponents-area');
+            const localSlotDiv = document.getElementById('local-played-slot');
+            opponentsDiv.innerHTML = '';
+            localSlotDiv.innerHTML = '';
+
             for (let id in playersData) {
                 const p = playersData[id];
-                const badge = document.createElement('div');
-                badge.className = `player-badge ${p.hasPlayed ? 'played' : ''}`;
-                badge.innerText = `${p.name} | ניקוד: ${p.score}`;
-                listDiv.appendChild(badge);
+                const isMe = (id === myId);
+                
+                // בניית אלמנט הקלף (אם השחקן בחר קלף)
+                let cardHtml = '';
+                if (p.hasPlayed || roundResultCards) {
+                    let cardVal = '';
+                    let flippedClass = '';
+                    
+                    // אם אנחנו בשלב התוצאות, נשלוף את הערך ונהפוך את הקלף
+                    if (roundResultCards) {
+                        const res = roundResultCards.find(rc => rc.id === id);
+                        if (res) {
+                            cardVal = res.card;
+                            flippedClass = 'flipped';
+                        }
+                    }
+
+                    cardHtml = `
+                        <div class="card-3d">
+                            <div class="card-inner ${flippedClass}">
+                                <div class="card-face card-back-pattern"></div>
+                                <div class="card-face card-front-value">${cardVal}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (isMe) {
+                    document.getElementById('local-player-info').innerText = `אני (${p.name}) | ניקוד: ${p.score}`;
+                    if (cardHtml) {
+                        localSlotDiv.innerHTML = cardHtml;
+                    } else {
+                        localSlotDiv.innerHTML = ''; // משבצת ריקה
+                    }
+                } else {
+                    const oppDiv = document.createElement('div');
+                    oppDiv.className = 'player-station';
+                    oppDiv.innerHTML = `
+                        <div class="player-badge">${p.name} | ${p.score}</div>
+                        <div class="played-card-slot">${cardHtml}</div>
+                    `;
+                    opponentsDiv.appendChild(oppDiv);
+                }
             }
         }
 
-        // --- פעולות שחקן ---
         function joinGame() {
             const name = document.getElementById('playerName').value.trim();
             if (name) socket.emit('joinGame', name);
         }
 
-        function startGame() {
-            socket.emit('startGame');
-        }
+        function startGame() { socket.emit('startGame'); }
 
         function playCard(index) {
             socket.emit('playCard', index);
-            renderHand(true); // משבית את היד עד הסיבוב הבא
+            renderHand(true); 
             document.getElementById('status-message').innerText = "ממתין לשאר השחקנים...";
         }
 
-        // --- מאזינים לשרת ---
+        // תקשורת שרת-לקוח
         socket.on('joined', (data) => {
             myId = data.id;
             myHand = data.hand;
         });
 
         socket.on('updateLobby', (playerNames) => {
-            document.getElementById('lobby-players').innerText = 'שחקנים בחדר: ' + playerNames.join(', ');
+            document.getElementById('lobby-players').innerHTML = `<h3>שחקנים בחדר:</h3><p>${playerNames.join(' • ')}</p>`;
             if (playerNames.length >= 2) {
                 document.getElementById('start-btn').style.display = 'inline-block';
             }
@@ -190,56 +255,56 @@
 
         socket.on('startRound', (data) => {
             switchScreen('game-board');
-            renderPlayers(data.players);
+            renderBoard(data.players); // מנקה קלפים מהסיבוב הקודם ושם משבצות ריקות
             renderHand(false);
             
+            // תמונת קלף האמצע
             const prizeDiv = document.getElementById('prize-container');
-            const colorClass = data.prize > 0 ? 'prize-positive' : 'prize-negative';
-            prizeDiv.innerHTML = `<div class="card prize-card ${colorClass}">${data.prize > 0 ? '+'+data.prize : data.prize}</div>`;
+            // כאן אנו מניחים שיש לך קבצים בשם images/prize_5.png וכו'
+            prizeDiv.innerHTML = `<img src="images/prize_${data.prize}.png" class="prize-img" alt="קלף ${data.prize}" onerror="this.onerror=null; this.outerHTML='<div class=\\'card-3d\\'><div class=\\'card-inner flipped\\'><div class=\\'card-face card-front-value\\'>${data.prize}</div></div></div>';">`;
             
-            document.getElementById('status-message').innerText = `סיבוב ${data.roundCount}/15 - בחר קלף מהיד!`;
+            document.getElementById('status-message').innerText = `סיבוב ${data.roundCount}/15 - בחר קלף!`;
         });
 
         socket.on('playerPlayed', (playersData) => {
-            renderPlayers(playersData);
+            renderBoard(playersData); // מעדכן כדי להציג את גב הקלף למי ששיחק
         });
 
         socket.on('roundResult', (data) => {
-            renderPlayers(data.players);
+            // הפונקציה renderBoard עכשיו מקבלת את הקלפים והופכת אותם באנימציה
+            renderBoard(data.players, data.playedCards);
             
-            let resultText = "הקלפים שנבחרו:\n";
-            data.playedCards.forEach(pc => {
-                resultText += `${pc.name}: ${pc.card}  `;
-                if (pc.id === myId) {
-                    // עדכון היד המקומית
-                    myHand = myHand.filter(val => val !== pc.card);
-                }
-            });
+            // מחיקת הקלף המקומי מהיד (כדי שלא יופיע בסיבוב הבא)
+            const myPlayed = data.playedCards.find(pc => pc.id === myId);
+            if (myPlayed) {
+                myHand = myHand.filter(val => val !== myPlayed.card);
+            }
             
+            let resultText = "";
             if (data.winnerId) {
                 const winnerName = data.playedCards.find(p => p.id === data.winnerId).name;
-                resultText += `\n\nהמנצח בסיבוב הוא ${winnerName} שקיבל את הקלף ${data.prize}!`;
+                resultText = `המנצח בסיבוב הוא ${winnerName}!\n(זכה ב-${data.prize})`;
             } else {
-                resultText += `\n\nתיקו! אף אחד לא זוכה בקלף האמצע.`;
+                resultText = `תיקו! אף אחד לא זוכה בקלף.`;
             }
             
             document.getElementById('status-message').innerText = resultText;
-            renderHand(true); // משאיר מושבת עד לסיבוב הבא
+            renderHand(true); 
         });
 
         socket.on('gameOver', (players) => {
             let sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
-            let endMsg = "המשחק נגמר!\nתוצאות סופיות:\n";
+            let endMsg = "המשחק נגמר!\n\nתוצאות סופיות:\n";
             sortedPlayers.forEach((p, i) => {
                 endMsg += `${i+1}. ${p.name} - ${p.score} נקודות\n`;
             });
-            alert(endMsg);
-            location.reload(); // ריענון חזרה ללובי
+            setTimeout(() => {
+                alert(endMsg);
+                location.reload(); 
+            }, 1000);
         });
 
-        socket.on('errorMsg', (msg) => {
-            alert(msg);
-        });
+        socket.on('errorMsg', (msg) => { alert(msg); });
     </script>
 </body>
 </html>
