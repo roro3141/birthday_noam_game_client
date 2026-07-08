@@ -42,7 +42,7 @@
             width: 90%;
             max-width: 400px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin: auto; /* ממורכז אנכית ואופקית */
+            margin: auto;
         }
         .menu-container h1 { margin-top: 0; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         .menu-container p { font-size: 1.2rem; color: #bdc3c7; margin-bottom: 30px; }
@@ -57,48 +57,92 @@
         }
         .players-list-box p { margin: 8px 0; font-size: 1.1rem; font-weight: bold; color: white; }
         
-        .start-btn-container {
-            min-height: 60px; /* שומר על גובה קבוע כדי שהמסך לא יקפוץ כשכפתור מופיע */
-        }
+        .start-btn-container { min-height: 60px; }
 
         /* לוח משחק */
         #game-board { 
             background-color: var(--table-bg);
             justify-content: space-between;
             box-sizing: border-box;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
             position: relative;
         }
 
         /* הגדרות כפתור מנהל */
         .host-controls { display: none; position: absolute; top: 10px; right: 10px; z-index: 10; }
-        .host-badge { color: var(--host-color); font-size: 1rem; margin-left: 5px; }
-        .offline { opacity: 0.5; text-decoration: line-through; }
+        .host-text { color: var(--host-color); font-size: 0.85em; font-weight: bold; margin-right: 5px; }
 
         /* אזורי שולחן */
-        .opponents-area { display: flex; justify-content: center; gap: 5vw; flex-wrap: wrap; padding: 10px; min-height: 15vh; align-items: flex-start; }
-        .center-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+        .opponents-area { display: flex; justify-content: center; gap: 5vw; flex-wrap: wrap; padding: 15px 10px; min-height: 15vh; align-items: flex-start; }
+        
+        .center-area { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; 
+            /* אפקט תאורת ספוטלייט למרכז השולחן */
+            background: radial-gradient(circle, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 65%);
+        }
+        
         .local-player-area {
             display: flex; flex-direction: column; align-items: center; 
-            border-top: 2px solid rgba(255,255,255,0.1); padding: 10px 5px;
-            background: rgba(0,0,0,0.3); max-height: 45vh;
+            border-top: 2px solid rgba(255,255,255,0.15); padding: 15px 5px 10px 5px;
+            background: rgba(0,0,0,0.35); max-height: 45vh;
         }
 
-        /* עמדת שחקן וקלפים */
-        .player-station { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .player-badge { background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 15px; font-weight: bold; font-size: clamp(0.7rem, 3vw, 1rem); white-space: nowrap; }
+        /* עמדת שחקן ועיצוב שמות וניקוד */
+        .player-station { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        
+        .player-badge-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.3s;
+        }
+        
+        .player-name {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 900; /* פונט בולט מאוד */
+            font-size: clamp(0.85rem, 3.5vw, 1.1rem);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap;
+        }
+        
+        .player-score {
+            background-color: var(--primary);
+            color: white;
+            width: clamp(28px, 8vw, 36px);
+            height: clamp(28px, 8vw, 36px);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            font-size: clamp(0.9rem, 4vw, 1.1rem);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+            border: 2px solid white;
+        }
+
+        /* שחקן מנותק */
+        .offline .player-name { opacity: 0.5; text-decoration: line-through; background: #555; }
+        .offline .player-score { filter: grayscale(100%); opacity: 0.5; }
+
         .played-card-slot {
             width: clamp(35px, 10vw, 60px); height: clamp(50px, 14vw, 85px); 
-            border: 2px dashed rgba(255,255,255,0.3); border-radius: 5px;
+            border-radius: 6px;
             display: flex; justify-content: center; align-items: center;
+            /* שקע בשולחן */
+            background: rgba(0,0,0,0.15);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,0,0,0.3);
         }
 
         .prize-img {
             width: clamp(70px, 20vw, 120px); height: clamp(105px, 30vw, 180px); object-fit: cover; border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.5);
             animation: dropIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes dropIn { 0% { transform: translateY(-30px) scale(0.8); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes dropIn { 0% { transform: translateY(-40px) scale(0.8); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
 
         /* עיצוב תלת-ממד */
         .card-3d { width: 100%; height: 100%; perspective: 1000px; }
@@ -119,32 +163,34 @@
 
         /* יד השחקן */
         .hand-container { 
-            display: flex; justify-content: center; flex-wrap: wrap; gap: 1vw; margin-top: 10px;
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5vw; margin-top: 10px;
             overflow-y: auto; padding-bottom: 10px; width: 100%;
         }
         .hand-card {
             width: clamp(40px, 11vw, 65px); height: clamp(60px, 16vw, 95px); 
             background-color: var(--card-bg); color: white;
-            border-radius: 5px; display: flex; justify-content: center; align-items: center;
-            font-size: clamp(1rem, 4vw, 1.5rem); font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            transition: transform 0.2s; border: 1px solid #bdc3c7;
+            border-radius: 6px; display: flex; justify-content: center; align-items: center;
+            font-size: clamp(1.1rem, 4.5vw, 1.6rem); font-weight: 900; cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #bdc3c7;
             background-size: cover; background-position: center;
-            text-shadow: 1px 1px 3px black, -1px -1px 3px black;
+            text-shadow: 1px 1px 4px black, -1px -1px 4px black;
         }
         .hand-card:active { transform: scale(0.9); }
-        .hand-card.disabled { opacity: 0.4; pointer-events: none; filter: grayscale(50%); }
+        .hand-card.disabled { opacity: 0.4; pointer-events: none; filter: grayscale(50%); box-shadow: none; }
 
-        #status-message { font-size: clamp(0.9rem, 3.5vw, 1.2rem); margin-top: 10px; color: #f1c40f; font-weight: bold; text-align: center; white-space: pre-line; }
+        #status-message { font-size: clamp(0.9rem, 3.5vw, 1.2rem); margin-top: 15px; color: #f1c40f; font-weight: 900; text-align: center; white-space: pre-line; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
         
         input, button { padding: 12px; font-size: 1.1rem; border: none; border-radius: 8px; margin: 5px; width: 100%; box-sizing: border-box; }
         button { background-color: var(--primary); color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button:hover { filter: brightness(1.1); }
         .btn-success { background-color: var(--success); font-size: 1.3rem; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .btn-danger { background-color: var(--danger); padding: 5px 10px; font-size: 0.8rem; width: auto; }
+        .btn-danger { background-color: var(--danger); padding: 5px 10px; font-size: 0.9rem; width: auto; border-radius: 5px; }
     </style>
 </head>
 <body>
 
+    <!-- מסך 1: התחברות -->
     <div id="login-screen" class="screen active">
         <div class="menu-container">
             <h1>Hol's der Geier</h1>
@@ -154,11 +200,11 @@
         </div>
     </div>
 
+    <!-- מסך 2: חדר המתנה -->
     <div id="lobby-screen" class="screen">
         <div class="menu-container">
             <h2>חדר המתנה</h2>
-            <div class="players-list-box" id="lobby-players">
-                </div>
+            <div class="players-list-box" id="lobby-players"></div>
             <div class="start-btn-container">
                 <button id="start-btn" class="btn-success" onclick="startGame()" style="display:none;">התחל את המשחק!</button>
                 <p id="waiting-msg" style="display:none; color: #f39c12; font-weight: bold;">ממתין למנהל החדר שיתחיל את המשחק...</p>
@@ -166,6 +212,7 @@
         </div>
     </div>
 
+    <!-- מסך 3: לוח משחק -->
     <div id="game-board" class="screen">
         <div class="host-controls" id="host-controls">
             <button class="btn-danger" onclick="forceEndGame()">סיים משחק לכולם</button>
@@ -180,7 +227,7 @@
 
         <div class="local-player-area">
             <div class="player-station">
-                <div class="player-badge" id="local-player-info"></div>
+                <div class="player-badge-container" id="local-player-info"></div>
                 <div id="local-played-slot" class="played-card-slot"></div>
             </div>
             <div class="hand-container" id="my-hand"></div>
@@ -193,17 +240,14 @@
         let myHand = [];
         let isMyHost = false;
         
-        // טעינה מהזיכרון המקומי
         let mySessionId = localStorage.getItem('holsSessionId');
         let myName = localStorage.getItem('holsPlayerName');
 
-        // אתחול SessionID אם אין
         if (!mySessionId) {
             mySessionId = 'player_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('holsSessionId', mySessionId);
         }
 
-        // ברגע שהסוקט מתחבר, נבדוק אם יש שם בזיכרון ואם כן נבצע התחברות אוטומטית
         socket.on('connect', () => {
             if (myName) {
                 socket.emit('joinGame', { name: myName, sessionId: mySessionId });
@@ -223,12 +267,9 @@
 
         function joinGame() {
             let nameInput = document.getElementById('playerName').value.trim();
-            if (!nameInput) {
-                alert("אנא הכנס שם.");
-                return;
-            }
+            if (!nameInput) { alert("אנא הכנס שם."); return; }
             myName = nameInput;
-            localStorage.setItem('holsPlayerName', myName); // שמירת השם להתחברויות הבאות
+            localStorage.setItem('holsPlayerName', myName);
             socket.emit('joinGame', { name: myName, sessionId: mySessionId });
         }
 
@@ -264,7 +305,7 @@
                 const p = playersData[id];
                 const isMe = (id === mySessionId);
                 const statusClass = p.online ? '' : 'offline';
-                const hostIcon = p.isHost ? '<span class="host-badge" title="מנהל החדר">👑</span>' : '';
+                const hostText = p.isHost ? '<span class="host-text">(מנהל)</span>' : '';
                 
                 let cardHtml = '';
                 if (p.hasPlayed || roundResultCards) {
@@ -292,13 +333,19 @@
                 }
 
                 if (isMe) {
-                    document.getElementById('local-player-info').innerHTML = `אני ${hostIcon} | ${p.score} נק'`;
+                    document.getElementById('local-player-info').innerHTML = `
+                        <div class="player-name">אני ${hostText}</div>
+                        <div class="player-score">${p.score}</div>
+                    `;
                     if (cardHtml) localSlotDiv.innerHTML = cardHtml;
                 } else {
                     const oppDiv = document.createElement('div');
                     oppDiv.className = 'player-station';
                     oppDiv.innerHTML = `
-                        <div class="player-badge ${statusClass}">${p.name}${hostIcon} | ${p.score}</div>
+                        <div class="player-badge-container ${statusClass}" data-player-name="${p.name}">
+                            <div class="player-name">${p.name} ${hostText}</div>
+                            <div class="player-score">${p.score}</div>
+                        </div>
                         <div class="played-card-slot">${cardHtml}</div>
                     `;
                     opponentsDiv.appendChild(oppDiv);
@@ -322,12 +369,10 @@
             }
         }
 
-        // --- מאזינים לאירועי השרת ---
-
         socket.on('joined', (data) => {
             myHand = data.player.hand;
             isMyHost = data.isHost;
-            switchScreen('lobby-screen'); // עובר ללובי אחרי התחברות ראשונית מוצלחת
+            switchScreen('lobby-screen');
         });
 
         socket.on('rejoined', (data) => {
@@ -351,9 +396,18 @@
         socket.on('updateLobby', (playersList) => {
             let html = '';
             playersList.forEach(p => {
-                const hostIco = p.isHost ? '<span class="host-badge">👑</span>' : '';
+                const hostText = p.isHost ? '<span class="host-text">(מנהל)</span>' : '';
                 const status = p.online ? '' : ' (התנתק)';
-                html += `<p class="${p.online ? '' : 'offline'}">${p.name} ${hostIco}${status}</p>`;
+                html += `<p class="${p.online ? '' : 'offline'}">${p.name} ${hostText}${status}</p>`;
+                
+                // עדכון תצוגת האופליין בזמן אמת בלוח המשחק במידה והוא פעיל
+                const oppBadgeElements = document.querySelectorAll('.player-badge-container');
+                oppBadgeElements.forEach(el => {
+                    if (el.dataset.playerName === p.name) {
+                        if (p.online) el.classList.remove('offline');
+                        else el.classList.add('offline');
+                    }
+                });
             });
             document.getElementById('lobby-players').innerHTML = html || '<p>אין שחקנים עדיין</p>';
             
@@ -361,7 +415,7 @@
             const startBtn = document.getElementById('start-btn');
             const waitingMsg = document.getElementById('waiting-msg');
             
-            if (myData) { // אם אני המנהל
+            if (myData) { 
                 isMyHost = true;
                 if (playersList.length >= 2) {
                     startBtn.style.display = 'block';
@@ -371,7 +425,7 @@
                     waitingMsg.style.display = 'block';
                     waitingMsg.innerText = "ממתין לעוד שחקנים...";
                 }
-            } else { // אני לא המנהל
+            } else { 
                 isMyHost = false;
                 startBtn.style.display = 'none';
                 waitingMsg.style.display = 'block';
@@ -414,13 +468,12 @@
                 endMsg += `${i+1}. ${p.name} - ${p.score} נקודות\n`;
             });
             alert(endMsg);
-            switchScreen('lobby-screen'); // חוזרים ללובי בסיום משחק (עוקף את מסך ההתחברות)
+            switchScreen('lobby-screen');
             myHand = [];
         });
 
         socket.on('errorMsg', (msg) => { 
             alert(msg);
-            // אם המשתמש ניסה להתחבר למשחק פעיל שהוא לא שייך אליו, נחזיר אותו למסך ההתחברות וננקה את הזיכרון
             if(msg === 'המשחק כבר התחיל.') {
                 localStorage.removeItem('holsPlayerName');
                 localStorage.removeItem('holsSessionId');
