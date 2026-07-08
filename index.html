@@ -77,7 +77,6 @@
         
         .center-area { 
             display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; 
-            /* אפקט תאורת ספוטלייט למרכז השולחן */
             background: radial-gradient(circle, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 65%);
         }
         
@@ -87,7 +86,7 @@
             background: rgba(0,0,0,0.35); max-height: 45vh;
         }
 
-        /* עמדת שחקן ועיצוב שמות וניקוד */
+        /* עמדת שחקן */
         .player-station { display: flex; flex-direction: column; align-items: center; gap: 8px; }
         
         .player-badge-container {
@@ -101,7 +100,7 @@
             background: linear-gradient(135deg, #2c3e50, #34495e);
             padding: 5px 12px;
             border-radius: 15px;
-            font-weight: 900; /* פונט בולט מאוד */
+            font-weight: 900;
             font-size: clamp(0.85rem, 3.5vw, 1.1rem);
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
@@ -123,7 +122,6 @@
             border: 2px solid white;
         }
 
-        /* שחקן מנותק */
         .offline .player-name { opacity: 0.5; text-decoration: line-through; background: #555; }
         .offline .player-score { filter: grayscale(100%); opacity: 0.5; }
 
@@ -131,7 +129,6 @@
             width: clamp(35px, 10vw, 60px); height: clamp(50px, 14vw, 85px); 
             border-radius: 6px;
             display: flex; justify-content: center; align-items: center;
-            /* שקע בשולחן */
             background: rgba(0,0,0,0.15);
             box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1);
             border: 1px solid rgba(0,0,0,0.3);
@@ -144,7 +141,6 @@
         }
         @keyframes dropIn { 0% { transform: translateY(-40px) scale(0.8); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
 
-        /* עיצוב תלת-ממד */
         .card-3d { width: 100%; height: 100%; perspective: 1000px; }
         .card-inner { width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
         .card-inner.flipped { transform: rotateY(180deg); }
@@ -161,7 +157,6 @@
             text-shadow: 1px 1px 3px black, -1px -1px 3px black;
         }
 
-        /* יד השחקן */
         .hand-container { 
             display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5vw; margin-top: 10px;
             overflow-y: auto; padding-bottom: 10px; width: 100%;
@@ -190,7 +185,6 @@
 </head>
 <body>
 
-    <!-- מסך 1: התחברות -->
     <div id="login-screen" class="screen active">
         <div class="menu-container">
             <h1>Hol's der Geier</h1>
@@ -200,7 +194,6 @@
         </div>
     </div>
 
-    <!-- מסך 2: חדר המתנה -->
     <div id="lobby-screen" class="screen">
         <div class="menu-container">
             <h2>חדר המתנה</h2>
@@ -212,7 +205,6 @@
         </div>
     </div>
 
-    <!-- מסך 3: לוח משחק -->
     <div id="game-board" class="screen">
         <div class="host-controls" id="host-controls">
             <button class="btn-danger" onclick="forceEndGame()">סיים משחק לכולם</button>
@@ -248,12 +240,26 @@
             localStorage.setItem('holsSessionId', mySessionId);
         }
 
+        // ברגע שהאתר עולה - נבדוק מול השרת מה מצב השחקן
         socket.on('connect', () => {
-            if (myName) {
-                socket.emit('joinGame', { name: myName, sessionId: mySessionId });
+            if (myName && mySessionId) {
+                socket.emit('checkSession', mySessionId);
             } else {
                 switchScreen('login-screen');
             }
+        });
+
+        // השרת אישר שהשחקן באמצע משחק פעיל
+        socket.on('sessionValid', () => {
+            socket.emit('joinGame', { name: myName, sessionId: mySessionId });
+        });
+
+        // השחקן לא במשחק פעיל (או שהמשחק עוד לא התחיל) - מעבירים למסך הפתיחה
+        socket.on('sessionInvalid', () => {
+            if (myName) {
+                document.getElementById('playerName').value = myName; // מילוי אוטומטי של השם
+            }
+            switchScreen('login-screen');
         });
 
         function switchScreen(screenId) {
@@ -400,7 +406,6 @@
                 const status = p.online ? '' : ' (התנתק)';
                 html += `<p class="${p.online ? '' : 'offline'}">${p.name} ${hostText}${status}</p>`;
                 
-                // עדכון תצוגת האופליין בזמן אמת בלוח המשחק במידה והוא פעיל
                 const oppBadgeElements = document.querySelectorAll('.player-badge-container');
                 oppBadgeElements.forEach(el => {
                     if (el.dataset.playerName === p.name) {
@@ -468,7 +473,7 @@
                 endMsg += `${i+1}. ${p.name} - ${p.score} נקודות\n`;
             });
             alert(endMsg);
-            switchScreen('lobby-screen');
+            switchScreen('login-screen');
             myHand = [];
         });
 
