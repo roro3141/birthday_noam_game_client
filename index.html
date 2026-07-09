@@ -204,6 +204,7 @@
         </div>
     </div>
 
+    <!-- מסך טריוויה -->
     <div id="trivia-screen" class="screen">
         <div class="menu-container" style="max-width: 500px; padding: 30px;">
             <h2 style="color: var(--primary); margin-top: 0;">זמן טריוויה! (בונוס 3 נק')</h2>
@@ -267,7 +268,7 @@
         }
 
         function startGame() { socket.emit('startGame'); }
-        function forceEndGame() { if(confirm("לסיים את המשחק לחלוטין ולחזור ללובי?")) socket.emit('forceEndGame'); }
+        function forceEndGame() { if(confirm("לסיים את המשחק לחלוטין ולחזור למסך הפתיחה?")) socket.emit('forceEndGame'); }
 
         function playCard(index) {
             socket.emit('playCard', index);
@@ -426,7 +427,6 @@
 
         socket.on('triviaResult', (data) => {
             const optionsBtns = document.getElementById('trivia-options').children;
-            // סימון התשובות
             Array.from(optionsBtns).forEach((btn, idx) => {
                 btn.disabled = true;
                 if (idx === data.correctIndex) {
@@ -441,7 +441,6 @@
                 statusEl.innerText = `המנצחים: ${data.correctPlayers.join(', ')}\nכל אחד מקבל 3 נק' בונוס!`;
                 if (data.correctPlayers.includes(myName)) {
                     audioWinPos.play().catch(e=>console.log(e));
-                    // אפקט חזותי לציון - הציון יהבהב בירוק
                     if (document.getElementById('my-score')) {
                         document.getElementById('my-score').style.backgroundColor = 'var(--success)';
                     }
@@ -450,7 +449,6 @@
                 statusEl.innerText = "אף אחד לא ענה נכון!";
             }
             
-            // עדכון הניקוד ברקע כדי שכשיחזרו ללוח המשחק הוא יהיה מעודכן
             renderBoard(data.players);
         });
 
@@ -491,14 +489,6 @@
                 const hostText = p.isHost ? '<span class="host-text">(מנהל)</span>' : '';
                 const status = p.online ? '' : ' (התנתק)';
                 html += `<p class="${p.online ? '' : 'offline'}">${p.name} ${hostText}${status}</p>`;
-                
-                const oppBadgeElements = document.querySelectorAll('.player-badge-container');
-                oppBadgeElements.forEach(el => {
-                    if (el.dataset.playerName === p.name) {
-                        if (p.online) el.classList.remove('offline');
-                        else el.classList.add('offline');
-                    }
-                });
             });
             document.getElementById('lobby-players').innerHTML = html || '<p>אין שחקנים עדיין</p>';
             
@@ -566,7 +556,12 @@
                 endMsg += `${i+1}. ${p.name} - ${p.score} נקודות\n`;
             });
             alert(endMsg);
-            switchScreen('lobby-screen');
+            
+            // תיקון: חזרה למסך הפתיחה והזנת השם אוטומטית
+            if (myName) {
+                document.getElementById('playerName').value = myName;
+            }
+            switchScreen('login-screen');
             myHand = [];
             mySelectedCardIndex = null;
         });
