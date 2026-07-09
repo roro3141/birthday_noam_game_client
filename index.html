@@ -153,7 +153,6 @@
         .btn-success { background-color: var(--success); font-size: 1.3rem; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .btn-danger { background-color: var(--danger); padding: 5px 10px; font-size: 0.9rem; width: auto; border-radius: 5px; }
 
-        /* עיצוב חידון טריוויה */
         .trivia-btn { background-color: #34495e; padding: 15px; margin: 8px 0; border: 2px solid transparent; font-size: 1.1rem; border-radius: 10px; transition: 0.3s; }
         .trivia-btn:hover:not(:disabled) { background-color: #2c3e50; transform: scale(1.02); }
         .trivia-btn.correct { background-color: var(--success) !important; border-color: white; color: white; }
@@ -204,7 +203,6 @@
         </div>
     </div>
 
-    <!-- מסך טריוויה -->
     <div id="trivia-screen" class="screen">
         <div class="menu-container" style="max-width: 500px; padding: 30px;">
             <h2 style="color: var(--primary); margin-top: 0;">זמן טריוויה! (בונוס 3 נק')</h2>
@@ -392,7 +390,6 @@
             }
         }
 
-        // --- פונקציות לטריוויה ---
         function renderTriviaScreen(data, hasAnswered = false) {
             switchScreen('trivia-screen');
             document.getElementById('trivia-question').innerText = data.question;
@@ -452,7 +449,6 @@
             renderBoard(data.players);
         });
 
-        // --- אירועים מרכזיים ---
         socket.on('joined', (data) => {
             myHand = data.player.hand;
             isMyHost = data.isHost;
@@ -485,12 +481,28 @@
 
         socket.on('updateLobby', (playersList) => {
             let html = '';
+            
+            // יצירת רשימת השחקנים למסך ההמתנה
             playersList.forEach(p => {
                 const hostText = p.isHost ? '<span class="host-text">(מנהל)</span>' : '';
                 const status = p.online ? '' : ' (התנתק)';
                 html += `<p class="${p.online ? '' : 'offline'}">${p.name} ${hostText}${status}</p>`;
             });
             document.getElementById('lobby-players').innerHTML = html || '<p>אין שחקנים עדיין</p>';
+            
+            // עדכון נראות של מחובר/מנותק בזמן אמת בלוח המשחק
+            playersList.forEach(p => {
+                const oppBadgeElements = document.querySelectorAll('.player-badge-container');
+                oppBadgeElements.forEach(el => {
+                    if (el.dataset.playerName === p.name) {
+                        if (p.online) {
+                            el.classList.remove('offline');
+                        } else {
+                            el.classList.add('offline');
+                        }
+                    }
+                });
+            });
             
             const myData = playersList.find(p => p.isHost && p.online && p.name === myName);
             const startBtn = document.getElementById('start-btn');
@@ -557,7 +569,6 @@
             });
             alert(endMsg);
             
-            // תיקון: חזרה למסך הפתיחה והזנת השם אוטומטית
             if (myName) {
                 document.getElementById('playerName').value = myName;
             }
