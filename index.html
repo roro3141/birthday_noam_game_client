@@ -29,11 +29,9 @@
             overflow: hidden;
         }
 
-        /* ניהול מסכים */
         .screen { display: none; width: 100%; height: 100%; }
         .screen.active { display: flex; flex-direction: column; }
 
-        /* מסכי פתיחה ולובי */
         .menu-container {
             background: var(--panel-bg);
             padding: 40px;
@@ -48,18 +46,12 @@
         .menu-container p { font-size: 1.2rem; color: #bdc3c7; margin-bottom: 30px; }
         
         .players-list-box {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 15px;
-            min-height: 100px;
-            margin-bottom: 20px;
-            text-align: right;
+            background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;
+            min-height: 100px; margin-bottom: 20px; text-align: right;
         }
         .players-list-box p { margin: 8px 0; font-size: 1.1rem; font-weight: bold; color: white; }
-        
         .start-btn-container { min-height: 60px; }
 
-        /* לוח משחק */
         #game-board { 
             background-color: var(--table-bg);
             justify-content: space-between;
@@ -68,58 +60,45 @@
             position: relative;
         }
 
-        /* הגדרות כפתור מנהל */
         .host-controls { display: none; position: absolute; top: 10px; right: 10px; z-index: 10; }
         .host-text { color: var(--host-color); font-size: 0.85em; font-weight: bold; margin-right: 5px; }
 
-        /* אזורי שולחן */
-        .opponents-area { display: flex; justify-content: center; gap: 5vw; flex-wrap: wrap; padding: 15px 10px; min-height: 15vh; align-items: flex-start; }
+        .opponents-area { display: flex; justify-content: center; gap: 5vw; flex-wrap: wrap; padding: 15px 10px; min-height: 12vh; align-items: flex-start; }
         
         .center-area { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1.5; /* הוגדל מ-1 ל-1.5 */
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            flex: 1.5; /* מוקצה יותר מקום לאמצע */
             background: radial-gradient(circle, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 65%);
+        }
+
+        #prize-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
         
         .local-player-area {
             display: flex; flex-direction: column; align-items: center; 
-            border-top: 2px solid rgba(255,255,255,0.15); padding: 15px 5px 10px 5px;
-            background: rgba(0,0,0,0.35); max-height: 45vh;
+            border-top: 2px solid rgba(255,255,255,0.15); padding: 10px 5px;
+            background: rgba(0,0,0,0.35); max-height: 33vh; /* הוקטן קצת לטובת האמצע */
         }
 
-        /* עמדת שחקן */
         .player-station { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        
-        .player-badge-container {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: opacity 0.3s;
-        }
-        
+        .player-badge-container { display: flex; align-items: center; gap: 6px; transition: opacity 0.3s; }
         .player-name {
             background: linear-gradient(135deg, #2c3e50, #34495e);
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-weight: 900;
-            font-size: clamp(0.85rem, 3.5vw, 1.1rem);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            white-space: nowrap;
+            padding: 5px 12px; border-radius: 15px; font-weight: 900;
+            font-size: clamp(0.85rem, 3.5vw, 1.1rem); box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1); white-space: nowrap;
         }
-        
         .player-score {
-            background-color: var(--primary);
-            color: white;
-            width: clamp(28px, 8vw, 36px);
-            height: clamp(28px, 8vw, 36px);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: 900;
-            font-size: clamp(0.9rem, 4vw, 1.1rem);
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
-            border: 2px solid white;
+            background-color: var(--primary); color: white;
+            width: clamp(28px, 8vw, 36px); height: clamp(28px, 8vw, 36px);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-weight: 900; font-size: clamp(0.9rem, 4vw, 1.1rem);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5); border: 2px solid white;
         }
 
         .offline .player-name { opacity: 0.5; text-decoration: line-through; background: #555; }
@@ -127,22 +106,15 @@
 
         .played-card-slot {
             width: clamp(35px, 10vw, 60px); height: clamp(50px, 14vw, 85px); 
-            border-radius: 6px;
-            display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.15);
-            box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1);
+            border-radius: 6px; display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.15); box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1);
             border: 1px solid rgba(0,0,0,0.3);
         }
 
-        #prize-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .prize-img, .card-3d.prize-card {
-            width: clamp(90px, 28vw, 160px); /* הוגדל משמעותית */
-            height: clamp(135px, 42vw, 240px); /* הוגדל משמעותית */
+        /* קלפי האמצע הוגדלו משמעותית */
+        .prize-img {
+            width: clamp(100px, 28vw, 160px); 
+            height: clamp(150px, 42vw, 240px); 
             object-fit: cover; border-radius: 8px;
             box-shadow: 0 15px 25px rgba(0,0,0,0.5);
             animation: dropIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -160,34 +132,34 @@
             background-size: cover; background-position: center;
         }
         .card-back-pattern { background: repeating-linear-gradient(45deg, #c0392b, #c0392b 8px, #e74c3c 8px, #e74c3c 16px); }
-        .card-front-value {
-            background-color: var(--card-bg); color: white; transform: rotateY(180deg);
-            text-shadow: 1px 1px 3px black, -1px -1px 3px black;
-        }
+        .card-front-value { background-color: var(--card-bg); color: white; transform: rotateY(180deg); text-shadow: 1px 1px 3px black, -1px -1px 3px black; }
 
         .hand-container { 
             display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5vw; margin-top: 10px;
             overflow-y: auto; padding-bottom: 10px; width: 100%;
         }
+        
+        /* קלפי השחקן הוקטנו מעט לטובת האמצע */
         .hand-card {
-            width: clamp(35px, 10vw, 55px); /* הוקטן קלות */
-            height: clamp(52px, 15vw, 82px); /* הוקטן קלות */
+            width: clamp(35px, 10vw, 55px); height: clamp(50px, 14vw, 85px); 
             background-color: var(--card-bg); color: white;
             border-radius: 6px; display: flex; justify-content: center; align-items: center;
-            font-size: clamp(1.1rem, 4.5vw, 1.6rem); font-weight: 900; cursor: pointer; 
+            font-size: clamp(1rem, 4vw, 1.4rem); font-weight: 900; cursor: pointer; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #bdc3c7;
+            transition: all 0.2s; border: 1px solid #bdc3c7;
             background-size: cover; background-position: center;
             text-shadow: 1px 1px 4px black, -1px -1px 4px black;
         }
-        .hand-card:active { transform: scale(0.9); }
-        .hand-card.disabled { opacity: 0.4; pointer-events: none; filter: grayscale(50%); box-shadow: none; }
         
+        /* עיצוב לקלף שנבחר על ידי השחקן */
         .hand-card.selected {
-            transform: translateY(-12px);
-            box-shadow: 0 0 15px var(--host-color);
-            border: 2px solid var(--host-color);
+            transform: translateY(-15px) scale(1.1);
+            border: 2px solid var(--primary);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.6);
         }
+        
+        .hand-card:active { transform: scale(0.9); }
+        .hand-card.disabled { opacity: 0.4; pointer-events: none; filter: grayscale(50%); box-shadow: none; transform: none; border: 1px solid #bdc3c7; }
 
         #status-message { font-size: clamp(0.9rem, 3.5vw, 1.2rem); margin-top: 15px; color: #f1c40f; font-weight: 900; text-align: center; white-space: pre-line; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
         
@@ -244,19 +216,23 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io('https://game-server-gwy6.onrender.com');
-        let myPlayedCardIndex = null;
         let myHand = [];
         let isMyHost = false;
+        let mySelectedCardIndex = null; // מעקב אחרי הבחירה הנוכחית של השחקן
+        let currentRoundCount = 0;
         
         let mySessionId = localStorage.getItem('holsSessionId');
         let myName = localStorage.getItem('holsPlayerName');
+
+        // טעינת צלילים
+        const audioWinPos = new Audio('audio/win_positive.mp3');
+        const audioWinNeg = new Audio('audio/win_negative.mp3');
 
         if (!mySessionId) {
             mySessionId = 'player_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('holsSessionId', mySessionId);
         }
 
-        // ברגע שהאתר עולה - נבדוק מול השרת מה מצב השחקן
         socket.on('connect', () => {
             if (myName && mySessionId) {
                 socket.emit('checkSession', mySessionId);
@@ -265,16 +241,12 @@
             }
         });
 
-        // השרת אישר שהשחקן באמצע משחק פעיל
         socket.on('sessionValid', () => {
             socket.emit('joinGame', { name: myName, sessionId: mySessionId });
         });
 
-        // השחקן לא במשחק פעיל (או שהמשחק עוד לא התחיל) - מעבירים למסך הפתיחה
         socket.on('sessionInvalid', () => {
-            if (myName) {
-                document.getElementById('playerName').value = myName; // מילוי אוטומטי של השם
-            }
+            if (myName) document.getElementById('playerName').value = myName;
             switchScreen('login-screen');
         });
 
@@ -300,13 +272,17 @@
 
         function playCard(index) {
             socket.emit('playCard', index);
-            if (myPlayedCardIndex === index) {
-                myPlayedCardIndex = null;
-                document.getElementById('status-message').innerText = `סיבוב ${document.getElementById('status-message').dataset.round} - בחר קלף!`;
+            
+            // עדכון המצב המקומי
+            if (mySelectedCardIndex === index) {
+                mySelectedCardIndex = null; // ביטול בחירה
+                document.getElementById('status-message').innerText = `סיבוב ${currentRoundCount} - בחר קלף!`;
             } else {
-                myPlayedCardIndex = index;
-                document.getElementById('status-message').innerText = "בחרת קלף. ממתין לשאר... (לחץ שוב לבטל או בחר אחר)";
+                mySelectedCardIndex = index; // בחירה חדשה
+                document.getElementById('status-message').innerText = "ממתין לשאר (לחץ שוב לביטול)...";
             }
+            
+            // רינדור מחדש בלי להשבית את היד (disabled=false)
             renderHand(false); 
         }
 
@@ -315,13 +291,16 @@
             handDiv.innerHTML = '';
             myHand.forEach((val, index) => {
                 const card = document.createElement('div');
-                const isSelected = (index === myPlayedCardIndex);
-                card.className = `hand-card ${disabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`;
+                card.className = `hand-card ${disabled ? 'disabled' : ''}`;
+                
+                // הוספת קלאס 'selected' אם זה הקלף שנבחר
+                if (index === mySelectedCardIndex && !disabled) {
+                    card.classList.add('selected');
+                }
+                
                 card.innerText = val;
                 card.style.backgroundImage = getCardBackgroundImageUrl(val);
-                card.onclick = () => {
-                    if (!disabled) playCard(index);
-                };
+                card.onclick = () => playCard(index);
                 handDiv.appendChild(card);
             });
         }
@@ -384,28 +363,37 @@
             }
         }
 
-        function setupGameUI(prize, roundCount, players, isResult = false) {
+        function setupGameUI(prizes, roundCount, players, isResult = false) {
             switchScreen('game-board');
             document.getElementById('host-controls').style.display = isMyHost ? 'block' : 'none';
+            currentRoundCount = roundCount;
             
+            // תמיכה במערך של קלפי אמצע (במקרה של תיקו קודם)
             const prizeDiv = document.getElementById('prize-container');
             prizeDiv.innerHTML = '';
             
-            if (prize !== null && prize.cards) {
-                prize.cards.forEach((val, idx) => {
-                    // יצירת חפיפה בין הקלפים במקרה של תיקו
-                    let overlap = idx > 0 ? 'margin-right: -40px;' : ''; 
-                    prizeDiv.innerHTML += `<img src="images/prize_${val}.png" class="prize-img" style="${overlap}" alt="${val}" onerror="this.onerror=null; this.outerHTML='<div class=\\'card-3d prize-card\\' style=\\'${overlap}\\'><div class=\\'card-inner flipped\\'><div class=\\'card-face card-front-value\\'>${val}</div></div></div>';">`;
+            if (prizes && prizes.length > 0) {
+                prizes.forEach(prize => {
+                    const img = document.createElement('img');
+                    img.src = `images/prize_${prize}.png`;
+                    img.className = 'prize-img';
+                    img.alt = prize;
+                    img.onerror = function() {
+                        this.outerHTML = `<div class='card-3d' style='width: clamp(100px,28vw,160px); height: clamp(150px,42vw,240px); margin: 0 5px;'><div class='card-inner flipped'><div class='card-face card-front-value'>${prize}</div></div></div>`;
+                    };
+                    prizeDiv.appendChild(img);
                 });
             }
-
+            
             if (!isResult) {
                 renderBoard(players);
-                renderHand(false);
+                renderHand(false); // לא משבית את היד בתחילת סיבוב
                 
-                const statusMessage = document.getElementById('status-message');
-                statusMessage.dataset.round = roundCount;
-                statusMessage.innerText = `סיבוב ${roundCount} - בחר קלף!`;
+                if (mySelectedCardIndex !== null) {
+                    document.getElementById('status-message').innerText = "ממתין לשאר (לחץ שוב לביטול)...";
+                } else {
+                    document.getElementById('status-message').innerText = `סיבוב ${roundCount} - בחר קלף!`;
+                }
             }
         }
 
@@ -419,16 +407,19 @@
             myHand = data.player.hand;
             isMyHost = data.publicPlayers[mySessionId].isHost;
             
+            // שחזור אינדקס הקלף הנבחר אם השחקן יצא באמצע סיבוב וסומן אצלו קלף
+            if (data.player.playedCard !== null) {
+                mySelectedCardIndex = myHand.indexOf(data.player.playedCard);
+            } else {
+                mySelectedCardIndex = null;
+            }
+            
             if (data.gameState === 'waiting') {
                 switchScreen('lobby-screen');
             } else if (data.gameState === 'playing') {
-                setupGameUI(data.currentPrize, data.roundCount, data.publicPlayers);
-                if (data.player.playedCard !== null) {
-                    renderHand(true);
-                    document.getElementById('status-message').innerText = "כבר שיחקת. ממתין לשאר...";
-                }
+                setupGameUI(data.prizes, data.roundCount, data.publicPlayers);
             } else if (data.gameState === 'roundResult' && data.lastRoundResult) {
-                setupGameUI(data.currentPrize, data.roundCount, data.publicPlayers, true);
+                setupGameUI(data.lastRoundResult.prizes, data.roundCount, data.publicPlayers, true);
                 renderRoundResult(data.lastRoundResult);
             }
         });
@@ -473,7 +464,8 @@
         });
 
         socket.on('startRound', (data) => {
-            setupGameUI(data.prize, data.roundCount, data.players);
+            mySelectedCardIndex = null; // איפוס בחירה בתחילת סיבוב חדש
+            setupGameUI(data.prizes, data.roundCount, data.players);
         });
 
         socket.on('playerPlayed', (playersData) => {
@@ -482,20 +474,29 @@
 
         function renderRoundResult(data) {
             renderBoard(data.players, data.playedCards);
+            
             const myPlayed = data.playedCards.find(pc => pc.id === mySessionId);
             if (myPlayed) myHand = myHand.filter(val => val !== myPlayed.card);
             
             let resultText = "";
             if (data.winnerId) {
                 const winnerName = data.playedCards.find(p => p.id === data.winnerId).name;
-                resultText = `המנצח הוא ${winnerName}!`;
+                resultText = `המנצח הוא ${winnerName}!\n(זכה ב-${data.prizeSum} נק')`;
+                
+                // בדיקה אם השחקן המקומי הוא המנצח והפעלת סאונד בהתאם
+                if (data.winnerId === mySessionId) {
+                    if (data.prizeSum > 0) {
+                        audioWinPos.play().catch(e => console.log("שגיאת הפעלת סאונד:", e));
+                    } else {
+                        audioWinNeg.play().catch(e => console.log("שגיאת הפעלת סאונד:", e));
+                    }
+                }
+                
             } else {
-                resultText = `תיקו! הקלף נזרק.`;
+                resultText = `תיקו!\nהקופה מצטברת לסיבוב הבא (סך הכל ${data.prizeSum})`;
             }
             document.getElementById('status-message').innerText = resultText;
-            renderHand(true);
-
-            myPlayedCardIndex = null;
+            renderHand(true); // עכשיו כשהסיבוב נגמר אנחנו משביתים את היד
         }
 
         socket.on('roundResult', (data) => {
@@ -509,8 +510,9 @@
                 endMsg += `${i+1}. ${p.name} - ${p.score} נקודות\n`;
             });
             alert(endMsg);
-            switchScreen('login-screen');
+            switchScreen('lobby-screen');
             myHand = [];
+            mySelectedCardIndex = null;
         });
 
         socket.on('errorMsg', (msg) => { 
