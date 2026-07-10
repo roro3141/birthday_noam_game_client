@@ -44,6 +44,38 @@
         }
         .menu-container h1 { margin-top: 0; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         .menu-container p { font-size: 1.2rem; color: #bdc3c7; margin-bottom: 30px; }
+
+        .login-layout {
+            justify-content: space-between; /* דוחף את האלמנטים לקצוות ולמרכז */
+            padding: 6vh 20px; /* ריווח מהקצוות העליונים והתחתונים של המסך */
+            box-sizing: border-box;
+        }
+
+        .login-title {
+            font-size: clamp(2.5rem, 10vw, 4rem); /* גודל פונט שמתאים את עצמו לרוחב המסך */
+            margin: 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        .login-image {
+            max-width: 80%;
+            max-height: 35vh; /* התמונה תתפוס מקסימום 35% מגובה המסך */
+            object-fit: contain; /* שומר על פרופורציות התמונה מבלי למעוך אותה */
+            margin: auto 0; /* דואג למרכז את התמונה בשטח הנותר */
+        }
+
+        .login-box-override {
+            width: 100%;
+            padding: 25px 20px; /* צמצום הריפוד (padding) כדי שייכנס טוב במסכים קטנים */
+            margin: 0; 
+            box-sizing: border-box;
+        }
+        
+        .login-box-override p {
+            margin-top: 0; 
+            margin-bottom: 20px;
+        }
         
         .players-list-box {
             background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;
@@ -215,9 +247,12 @@
 </head>
 <body>
 
-    <div id="login-screen" class="screen active">
-        <div class="menu-container">
-            <h1>Hol's der Geier</h1>
+    <div id="login-screen" class="screen active login-layout">
+        <h1 class="login-title">משחק יום הולדת לנועם</h1>
+        
+        <img src="images/start_image.png" alt="משחק קלפים" class="login-image">
+        
+        <div class="menu-container login-box-override">
             <p>הכנס את שמך כדי להתחיל</p>
             <input type="text" id="playerName" placeholder="השם שלך..." maxlength="12">
             <button onclick="joinGame()">היכנס למשחק</button>
