@@ -94,6 +94,7 @@
             display: flex;
             flex-direction: column;
             flex: 1; 
+            min-width: 0; /* קריטי: מאפשר לאזור האמצעי "לנשום" ולא להימחץ על ידי הצדדים */
             align-items: center;
         }
 
@@ -110,11 +111,22 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 15px;
-            padding: 0 5px;
+            align-items: center;
+            gap: 5px;
+            /* הגבלת הרוחב: תופס מקסימום 22% מהמסך או 90 פיקסלים, כדי להשאיר מקום לאמצע */
+            width: clamp(60px, 22vw, 90px); 
+            flex-shrink: 0; 
         }
+
         .side-opponents:empty {
-            padding: 0;
+            width: 0; /* אם אין שחקנים בצד הזה, הוא מתכווץ ל-0 ולא דוחף את האמצע */
+        }
+
+        .side-opponents .player-station {
+            transform: scale(0.75); /* מקטין את הבועה והקלף בצדדים ב-25% */
+            transform-origin: center center;
+            /* פיצוי על "השטח המת": transform מקטין ויזואלית אבל משאיר את הגודל המקורי ב-DOM, המינוס מסדר את זה */
+            margin: -15px 0; 
         }
         
         .center-area { 
@@ -131,7 +143,6 @@
             background: rgba(0,0,0,0.35); max-height: 33vh; 
         }
 
-        .player-station { display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .player-badge-container { display: flex; align-items: center; gap: 6px; transition: opacity 0.3s; }
         .player-name {
             background: linear-gradient(135deg, #2c3e50, #34495e);
