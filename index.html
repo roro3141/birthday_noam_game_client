@@ -61,6 +61,19 @@
         }
 
         .host-controls { display: none; position: absolute; top: 10px; right: 10px; z-index: 10; }
+        #round-counter-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
         .host-text { color: var(--host-color); font-size: 0.85em; font-weight: bold; margin-right: 5px; }
 
         .opponents-area { display: flex; justify-content: center; gap: 5vw; flex-wrap: wrap; padding: 15px 10px; min-height: 12vh; align-items: flex-start; }
@@ -186,6 +199,8 @@
         <div class="host-controls" id="host-controls">
             <button class="btn-danger" onclick="forceEndGame()">סיים משחק לכולם</button>
         </div>
+
+        <div id="round-counter-box">סיבוב <span id="current-round-display">1</span>/15</div>
 
         <div class="opponents-area" id="opponents-area"></div>
 
@@ -361,6 +376,7 @@
             switchScreen('game-board');
             document.getElementById('host-controls').style.display = isMyHost ? 'block' : 'none';
             currentRoundCount = roundCount;
+            document.getElementById('current-round-display').innerText = roundCount;
             
             const prizeDiv = document.getElementById('prize-container');
             prizeDiv.innerHTML = '';
