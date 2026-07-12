@@ -318,6 +318,8 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io('https://game-server-gwy6.onrender.com');
+        const urlParams = new URLSearchParams(window.location.search);
+        const myRoomId = urlParams.get('room') || 'default';
         let myHand = [];
         let isMyHost = false;
         let mySelectedCardIndex = null; 
@@ -347,7 +349,7 @@
 
         socket.on('connect', () => {
             if (myName && mySessionId) {
-                socket.emit('checkSession', mySessionId);
+                socket.emit('checkSession', { sessionId: mySessionId, roomId: myRoomId });
             } else {
                 switchScreen('login-screen');
             }
@@ -376,7 +378,7 @@
             if (!nameInput) { alert("אנא הכנס שם."); return; }
             myName = nameInput;
             localStorage.setItem('holsPlayerName', myName);
-            socket.emit('joinGame', { name: myName, sessionId: mySessionId });
+            socket.emit('joinGame', { name: myName, sessionId: mySessionId, roomId: myRoomId });
         }
 
         function startGame() { socket.emit('startGame'); }
